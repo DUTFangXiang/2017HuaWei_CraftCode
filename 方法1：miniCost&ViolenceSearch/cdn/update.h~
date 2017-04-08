@@ -1,0 +1,37 @@
+#ifndef __UPDATEGRAPH_H__
+#define __UPDATEGRAPH_H__
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+#include "edge.h"
+
+using namespace std;
+
+class updategraph{
+private:
+	SparseGraph &G;
+	int souce;         //源点
+	int aim;           //终点
+	int sumcost;       //最小费用
+	int maxstream;     //最大流
+	int *distTo;       //最小cost
+	int *stepTo;       //最小cost下，step数
+	int *streamTo;     //最小cost下，最大流
+	bool *marked;      //是否被标记为已选中的节点
+	vector<Edge*> from;//存储上一节点位置
+	queue<int> Q;
+	bool reachrequest;
+public:
+	updategraph(SparseGraph &graph, int s, int t, int require);
+	~updategraph();
+	void SPFA(int s);  
+	int maxStream(){
+	    return maxstream;
+	}
+	int sumCost(){
+	    return sumcost;
+	}
+};
+#endif

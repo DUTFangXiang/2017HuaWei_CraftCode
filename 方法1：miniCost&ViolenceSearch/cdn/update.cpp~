@@ -1,0 +1,162 @@
+#include"cdn.h"	
+
+/*
+@更新图的有参构造函数 
+@入参：  graph构建的图模型，s是服务器，t是消费节点，require是需求流量
+@返回值：无
+修改时间：2017-3-22
+*/
+updategraph::updategraph(SparseGraph &graph, int s, int t, int require) 
+    :G(graph) 
+{
+    this->souce = s;
+    this->aim = t;
+    sumcost = 0;
+    maxstream = 0;
+    distTo   = new int[G.V()];
+    marked   = new bool[G.V()];
+    stepTo   = new int[G.V()];
+    streamTo = new int[G.V()];
+    for (int i = 0; i < G.V(); i++)
+    {
+	from.push_back(NULL);
+    }
+    reachrequest = false;
+    ////////////////////////////////////
+    if (s == t)
+    {
+	sumcost = 0;
+	maxstream = require;
+	reachrequest = true;
+	int consumeNode = G.networkToconsume(aim);
+	G.f[consumeNode]->requireCost -= require;
+    }
+    else
+    {
+	SPFA(s);
+	int min_rem_f;//记录增广路径中的残留容量
+	while (from[t] != NULL)
+	{
+	    min_rem_f = MAXVALUE;
+	    Edge* e = from[t];
+	    while (e != NULL)//找经过的边最小的可提供带宽
+	    {
+	        if (min_rem_f > e->rem_f)
+		    min_rem_f = e->rem_f;
+		e = from[e->v()];
+	    }
+	    if (maxstream + min_rem_f >= require)
+ 	    {
+		min_rem_f = require - maxstream;
+		maxstream = require;
+		reachrequest = true;
+	    }
+	    else
+	    {
+		maxstream += min_rem_f;
+	    }
+	    e = from[t];   //计算增广路径上的残留容量
+	    while (e != NULL)
+ 	    {
+		sumcost += e->cur_cost * min_rem_f;//更新sumcost
+		e->use_f += min_rem_f;             //修改流
+		e->rem_f -= min_rem_f;
+		if (e->rem_f == 0 && e->cur_cost < 0)
+		{
+		    e->rem_f = e->bw();
+		    e->use_f = 0;
+		    e->cur_cost = e->cost();
+		}
+		SparseGraph::adjIterator adj(G, e->w());
+		for (Edge* e2 = adj.begin(); !adj.end(); e2 = adj.next())
+		{
+		    if (e2->w() == e->v())
+		    {
+		        if (e2->rem_f == e2->bw())
+			{
+			    e2->use_f = -e->use_f;
+			    e2->rem_f = e2->bw() - e->rem_f;
+			    e2->cur_cost = -e2->cost();
+			}
+			else
+			{
+			    e2->use_f -= min_rem_f;//修改残留容量
+			    e2->rem_f += min_rem_f;
+			}
+			break;
+		    }
+		}
+		e = from[e->v()];
+	    }
+	    if (reachrequest)
+		break;
+	    SPFA(s);  //求最短路径的SPFA算法 
+	}
+	G.updateEdge();
+	int consumeNode = G.networkToconsume(aim);
+	G.f[consumeNode]->requireCost -= require;
+    }	
+}
+
+/*
+@更新图的析构函数 
+@入参：  无
+@返回值：无
+修改时间：2017-3-22
+*/
+updategraph::~updategraph()
+{
+    delete[] distTo;
+    delete[] marked;
+    delete[] stepTo;
+    delete[] streamTo;
+}
+
+/*
+@求最短路径的SPFA算法
+@入参：  无
+@返回值：无
+修改时间：2017-3-22
+*/
+void updategraph::SPFA(int s)
+{  
+    for (int i = 0; i < G.V(); i++)
+    {
+    	distTo[i] = MAXVALUE;
+	marked[i] = false;
+	stepTo[i] = 0;
+	streamTo[i] = 0;
+	from[i] = NULL;
+    }
+    distTo[s] = 0;
+    Q.push(s);
+    marked[s] = true;
+    while (!Q.empty())
+    {
+   	int v = Q.front();
+	Q.pop();
+	marked[v] = false;
+	SparseGraph::adjIterator adj(G, v);
+	//更新u的邻接点的distTo[], from[], marked[]
+	for (Edge* e = adj.begin(); !adj.end(); e = adj.next())
+        {
+	    int w = e->other(v);
+	    // 表示(u,v)没有边 
+	    if (e->rem_f == 0)      
+		continue;
+ 	    //松弛操作 
+	    if (distTo[w] > distTo[v] + e->cur_cost) 
+	    {
+		distTo[w] = distTo[v] + e->cur_cost;
+		from[w] = e;
+		//此处可用堆优化
+		if (marked[w] == false)
+		{
+		    Q.push(w);
+		    marked[w] = true;
+		}
+	    }
+	}
+    }
+}
+

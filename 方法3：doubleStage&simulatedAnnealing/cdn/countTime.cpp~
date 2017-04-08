@@ -1,0 +1,17 @@
+
+#include "cdn.h"
+
+/*
+@计时功能，算得程序运行时间
+@入参：  start 程序开始计时的起点 
+@返回值：end   得到的程序运行时间
+修改时间：2017-3-14
+*/
+clock_t countTime(clock_t start)
+{
+
+   clock_t end = (clock()-start)/CLOCKS_PER_SEC;
+   
+   return end;
+
+}

@@ -1,0 +1,57 @@
+#ifndef __EDGESTRCUT_H__
+#define __EDGESTRCUT_H__
+
+struct Edge{
+    int startNode;   //每条路径的起始节点和结束节点
+    int endNode;
+    int bandWidth;   //每条线路的带宽
+    int unitPathCost;//单位网络租用费	
+    int rem_f;       //剩余带
+    int cur_cost;    //当前路径花费
+    int copy_rem_f;  //拷贝原始数据，每次查询前从头开始
+    int copy_cur_cost;
+};
+
+class Edge
+{
+private:
+    int startNode, endNode;//每条路径的起始节点和结束节点
+    int bandWidth;         //每条线路的带宽
+    int unitPathCost;      //单位网络租用费	
+public:	
+    int rem_f;             //剩余带宽
+    int cur_cost;          //当前路径花费
+    //拷贝原始数据，每次查询前从头开始
+    int copy_rem_f;
+    int copy_cur_cost;
+    //构造函数
+    Edge(int a, int b,int bw, int cost);
+    int v(){ 
+	return startNode; 
+    }
+    int w(){ 
+	return endNode; 
+    }
+    int bw(){ 
+	return bandWidth; 
+    }
+    int cost(){ 
+	return unitPathCost; 
+    }
+    int rem(){ 
+	return rem_f; 
+    }
+    void recover(){
+	this->rem_f = copy_rem_f;
+	this->cur_cost = copy_cur_cost;
+    }
+    void update(){
+	this->copy_rem_f = rem_f;
+	this->copy_cur_cost = cur_cost;
+    }
+    int other(int x){
+	return x == startNode ? endNode : startNode;
+    }
+};
+
+#endif

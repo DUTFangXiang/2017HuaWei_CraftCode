@@ -1,0 +1,30 @@
+#ifndef __COSTSTREAM_H__
+#define __COSTSTREAM_H__
+
+/*class CostStream
+{
+public:
+    int source;
+    int aim;
+    int mincost;
+    int maxstream;
+
+    CostStream(int a, int b, int cost, int stream)
+    {
+	source = a;
+	aim = b;
+	mincost = cost;
+	maxstream = stream;
+    }
+    //~CostStream(){ }
+};*/
+
+struct CostStream
+{
+    int source;
+    int aim;
+    int mincost;
+    int maxstream;
+};
+
+#endif

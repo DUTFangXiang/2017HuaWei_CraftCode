@@ -1,0 +1,94 @@
+#include<stdio.h>
+#include"cdn.h"
+
+/*
+@构造函数，主要为了初始化图矩阵
+@入参：  无
+@返回值：无
+@修改时间：2017-3-11
+*/
+Network::Network()
+{
+    //初始假设所有节点间为无穷大，MAXVALUE=10,000来模拟
+    for(int i=0;i<MAXV;i++)
+	for(int j=0;j<MAXV;j++)
+        {
+	    graphBW[i][j] = MAXVALUE;
+            graphCost[i][j]= MAXVALUE;
+        } 
+    //连接网络节点最多的一个节点的索引
+    MostConnectNode = 0;
+}
+/*
+@解析输入样本文件的每行数据
+@入参：  line每行数据 num每行字符数（包括空格）
+@返回值：void
+修改时间：2017-3-8
+*/
+void Network::AnalyseLine(char* line[MAX_EDGE_NUM], int lineNum)
+{
+    //提取网络节点数量 网络链路数量 消费节点数量
+    sscanf(line[0],"%d %d %d",&this->networkNodeNum, &this->networkPathNum, &this->consumeNodeNum);
+    //提取视频内容服务器部署成本
+    sscanf(line[2],"%d",&this->serverCost);
+    //提取链路起点ID 终点ID 总带宽大小 单位网络租用费
+    for(int i=0;i<this->networkPathNum;i++)
+    {
+	sscanf(line[i+4],"%d %d %d %d",&this->startNode[i],
+               &this->endNode[i],&this->bandWidth[i],&this->unitPathCost[i]);
+    }
+    //提取消费节点ID 相连网络节点ID 视频带宽消耗需求
+    int temp = networkPathNum + 5;
+    for(int i=0;i<this->consumeNodeNum;i++)
+    {
+        sscanf(line[i+temp],"%d %d %d",&this->consumeNodeID[i],&this->linkedNodeID[i],&this->requireCost[i]);
+    }
+}
+
+/*
+@创建初始的图,给每条相连节点i和j间graphBW[][]和graphCost[][]赋值
+@入参：  void
+@返回值：void
+修改时间：2017-3-11
+*/
+void Network::CreateGraphArr(void)
+{
+    //构建初始节点链路图，不相连则赋值10,000模拟无穷大
+    for(int i=0;i<networkPathNum;i++)
+    {   
+	graphBW[startNode[i]][endNode[i]]  = bandWidth[i]; 
+	graphCost[startNode[i]][endNode[i]]= unitPathCost[i];
+	graphBW[endNode[i]][startNode[i]]  = bandWidth[i]; 
+	graphCost[endNode[i]][startNode[i]]= unitPathCost[i];         
+	//printf("%d %d %d %d\n",startNode[i],endNode[i],
+        //       graphBW[startNode[i]][endNode[i]],graphCost[startNode[i]][endNode[i]]);  
+    }
+    //假设每个消费节点相连接的网络节点布局服务器，则消费总额为 服务器均价*服务器总数
+    totalCost = this->serverCost * this->consumeNodeNum;  
+    printf("%ld\n",totalCost);
+    //布置对应消费节点i连接的网络节点一直到服务器,目前就是相连的节点
+    for(int i=0;i<consumeNodeNum;i++)
+    {
+        vector<int> temp;
+	temp.push_back(linkedNodeID[i]);
+	finalPath.push_back(temp);
+    }
+}
+/* 
+void Network::createInitialGraph(int consumeID)
+{
+    vector<bool> midNode(this->networkNodeNum,false);
+    midNode[consumeID] = true; 
+    for(int i=0;i<this->networkNodeNum;i++)
+    {
+
+    }
+    for(int i=0;i<this->networkNodeNum;i++)
+    {
+	
+    } 
+}
+*/
+
+
+

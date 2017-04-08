@@ -1,0 +1,12 @@
+#ifndef __ROUTE_H__
+#define __ROUTE_H__
+
+#include <time.h>
+#include "lib_io.h"
+
+void deploy_server(char * graph[MAX_EDGE_NUM], int edge_num, char * filename);
+
+clock_t countTime(clock_t start);   // 计时功能，结果以秒为输出
+	
+
+#endif

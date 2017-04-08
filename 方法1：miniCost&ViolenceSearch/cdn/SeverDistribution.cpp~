@@ -1,0 +1,83 @@
+#include<stdio.h>
+#include"cdn.h"
+
+//标志对应消费节点是否访问到（BFS对该题不是很好，节点其实可以再访问的）
+bool visit[MAXV] = {false};
+
+/*
+@统计链路中与其他节点连接最多的一个网络节点
+@入参：  void
+@返回值：void
+@修改时间：2017-3-11
+*/
+void Network::CountMostNode(void)
+{
+    //申请hash矩阵空间
+    int* hashNum = new int[networkNodeNum];
+    for(int i=0;i<networkNodeNum;i++)
+    {   
+	hashNum[i] = 0; 
+    }
+    //构建节点的哈希矩阵，统计每个节点连接其他节点的个数
+    for(int i=0;i<networkPathNum;i++)
+    {   
+	hashNum[startNode[i]]++;
+        hashNum[endNode[i]]++; 
+    }
+    //搜索哈希矩阵中最大值所对应的矩阵
+    int maxValue = hashNum[0];
+    for(int i=1;i<networkNodeNum-1;i++)
+    {        
+        if(maxValue < hashNum[i])
+        	MostConnectNode = i;
+    }  
+    printf("%d\n",MostConnectNode);
+    //释放hash矩阵空间
+    delete[] hashNum;
+    hashNum = NULL;
+}
+
+/*
+@初始化每个消费节点剩余需要补充的流量为总需求量
+@入参：  *remainCost存储每个消费节点剩余需求量
+@返回值：void
+@修改时间：2017-3-14
+*/
+void Network::initialRemainCost(int* remainCost)
+{
+    for(int i=0;i<networkPathNum;i++)
+        remainCost[i] = requireCost[i];
+}
+
+/*
+@动态规划/BFS深度优先搜索寻找连接最多节点的网络节点
+MostConnectNode和
+@入参：  void
+@返回值：void
+@修改时间：2017-3-14
+*/
+void Network::MostNode2Other(int node)
+{
+    //当前节点表示已经访问到
+    visit[node] = true;
+    //判断当前节点是否与消费节点连接，连接责记录下来
+    for(int i=0;i<consumeNodeNum;i++)
+    {
+	if(node == linkedNodeID[i])
+	     
+    }
+    for(int i=0;i<networkNodeNum;i++)
+    {
+	if(!visit[i] && graphBW[MostConnectNode][i]!=MAXVALUE) 
+	{    
+	    node = i;
+
+	}       
+    }
+}
+
+
+
+
+
+
